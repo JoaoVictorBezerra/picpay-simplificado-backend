@@ -12,7 +12,10 @@ import java.util.List;
 public class RestExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ProblemDetail handleIncorrectPasswordOrEmail(BusinessException exception) {
-        return exception.toProblemDetail();
+        var problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setTitle(exception.getTitle());
+        problemDetail.setDetail(exception.getMessage());
+        return problemDetail;
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

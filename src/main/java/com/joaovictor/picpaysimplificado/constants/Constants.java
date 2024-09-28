@@ -11,4 +11,7 @@ public final class Constants {
     public static final String INVALID_PAYER_TITLE = "Invalid Payer!";
     public static final String INVALID_PAYER_DETAIL = "Traders can't do transaction.";
 
+    public static final String USER_ALREADY_EXISTS_TITLE = "User already exists!";
+    public static final String USER_ALREADY_EXISTS_DETAIL = "Email or document already exists.";
+
 }

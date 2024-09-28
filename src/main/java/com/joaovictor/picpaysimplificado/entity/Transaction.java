@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
+@Table(name = "Transactions")
 @Getter
 @Setter
 @NoArgsConstructor
