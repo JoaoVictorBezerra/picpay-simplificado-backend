@@ -1,35 +1,29 @@
 package com.joaovictor.picpaysimplificado.utils.api;
 
-public final class StringUtil {
-    private StringUtil() {
-        throw new IllegalArgumentException("This is an utility class!");
-    }
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class StringUtil {
     public static String toCPFMask(String unmaskedValue) {
-        if (unmaskedValue.length() == 11) {
-            return unmaskedValue.substring(0, 3)
-                  + "."
-                  + unmaskedValue.substring(3, 3)
-                  + "."
-                  + unmaskedValue.substring(6, 3)
-                  + "-"
-                  + unmaskedValue.substring(8, 2);
-        }
-        throw new RuntimeException();
+        return unmaskedValue.substring(0, 3)
+              + "."
+              + unmaskedValue.substring(3, 6)
+              + "."
+              + unmaskedValue.substring(6, 9)
+              + "-"
+              + unmaskedValue.substring(9, 11);
     }
 
     public static String toCNPJMask(String unmaskedValue) {
-        if (unmaskedValue.length() == 14) {
-            return new StringBuilder(unmaskedValue).substring(0, 2).concat(
-                  "." + unmaskedValue.substring(2, 3)
-                        + "."
-                        + unmaskedValue.substring(4, 3)
-                        + "/"
-                        + unmaskedValue.substring(7, 4)
-                        + "-"
-                        + unmaskedValue.substring(11, 2)
-            );
-        }
-        throw new RuntimeException();
+        return unmaskedValue
+              .substring(0, 2) + "." + unmaskedValue.substring(2, 5)
+              + "."
+              + unmaskedValue.substring(5, 8)
+              + "/"
+              + unmaskedValue.substring(8, 12)
+              + "-"
+              + unmaskedValue.substring(12, 13);
+
     }
 }
