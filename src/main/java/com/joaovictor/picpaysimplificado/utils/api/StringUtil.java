@@ -5,7 +5,7 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class StringUtil {
-    public static String toCPFMask(String unmaskedValue) {
+    private static String toCPFMask(String unmaskedValue) {
         return unmaskedValue.substring(0, 3)
               + "."
               + unmaskedValue.substring(3, 6)
@@ -15,7 +15,7 @@ public final class StringUtil {
               + unmaskedValue.substring(9, 11);
     }
 
-    public static String toCNPJMask(String unmaskedValue) {
+    private static String toCNPJMask(String unmaskedValue) {
         return unmaskedValue
               .substring(0, 2) + "." + unmaskedValue.substring(2, 5)
               + "."
@@ -26,4 +26,10 @@ public final class StringUtil {
               + unmaskedValue.substring(12, 13);
 
     }
+
+    public static String setMaskOnDocument(String document) {
+        if(document.length() == 11) return toCPFMask(document);
+        return toCNPJMask(document);
+    }
 }
+

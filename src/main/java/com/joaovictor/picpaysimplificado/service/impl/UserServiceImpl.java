@@ -5,6 +5,7 @@ import com.joaovictor.picpaysimplificado.dto.user.CreateUserRequestDTO;
 import com.joaovictor.picpaysimplificado.dto.user.UserDTO;
 import com.joaovictor.picpaysimplificado.entity.User;
 import com.joaovictor.picpaysimplificado.exceptions.user.UserAlreadyExistsException;
+import com.joaovictor.picpaysimplificado.exceptions.user.UserNotFoundException;
 import com.joaovictor.picpaysimplificado.mappers.UserMapper;
 import com.joaovictor.picpaysimplificado.repository.UserRepository;
 import com.joaovictor.picpaysimplificado.service.interfac.UserService;
@@ -26,9 +27,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User findUserById(Long id) {
-        return userRepository.findById(id).orElseThrow(
-              () -> new RuntimeException("Usuário não encontrado")
-        );
+        return userRepository.findById(id)
+              .orElseThrow(() ->
+                    new UserNotFoundException(Constants.USER_NOT_FOUND_DETAIL, Constants.USER_NOT_FOUND_TITLE));
     }
 
     @Override
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO createUser(CreateUserRequestDTO createUserRequestDTO) {
         log.info("METHOD:: Start to create user with document {} and e-mail {}", createUserRequestDTO.document(), createUserRequestDTO.email());
         var userAlreadyExists = verifyIfExistsUserByDocumentOrEmail(createUserRequestDTO.document(), createUserRequestDTO.email());
-        if(userAlreadyExists){
+        if (userAlreadyExists) {
             log.error("METHOD:: Aborting operation to {} - {}", createUserRequestDTO.document(), createUserRequestDTO.email());
             throw new UserAlreadyExistsException(Constants.USER_ALREADY_EXISTS_DETAIL, Constants.USER_ALREADY_EXISTS_TITLE);
         }

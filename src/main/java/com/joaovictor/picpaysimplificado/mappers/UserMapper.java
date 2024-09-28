@@ -28,15 +28,10 @@ public class UserMapper {
         return new UserDTO(
               entity.getId(),
               entity.getName(),
-              setMask(entity.getDocument()),
+              StringUtil.setMaskOnDocument(entity.getDocument()),
               entity.getEmail(),
               entity.getCreatedAt(),
               entity.getBalance()
         );
-    }
-
-    private static String setMask(String document) {
-        if(document.length() == 11) return StringUtil.toCPFMask(document);
-        return StringUtil.toCNPJMask(document);
     }
 }

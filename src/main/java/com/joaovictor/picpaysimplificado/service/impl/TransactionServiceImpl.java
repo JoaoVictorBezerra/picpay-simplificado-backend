@@ -2,6 +2,8 @@ package com.joaovictor.picpaysimplificado.service.impl;
 
 import com.joaovictor.picpaysimplificado.constants.Constants;
 import com.joaovictor.picpaysimplificado.constants.api.transaction.TransactionStatusEnum;
+import com.joaovictor.picpaysimplificado.dto.transaction.CreateTransactionDTO;
+import com.joaovictor.picpaysimplificado.dto.transaction.ExternalStatusResponseDTO;
 import com.joaovictor.picpaysimplificado.entity.Transaction;
 import com.joaovictor.picpaysimplificado.entity.User;
 import com.joaovictor.picpaysimplificado.exceptions.transaction.InsufficientBalance;
@@ -10,25 +12,28 @@ import com.joaovictor.picpaysimplificado.mappers.TransactionMapper;
 import com.joaovictor.picpaysimplificado.repository.TransactionRepository;
 import com.joaovictor.picpaysimplificado.service.interfac.TransactionService;
 import com.joaovictor.picpaysimplificado.service.interfac.UserService;
-import lombok.AllArgsConstructor;
+import com.joaovictor.picpaysimplificado.utils.api.StringUtil;
+import com.joaovictor.picpaysimplificado.utils.http.JsonUtil;
+import com.joaovictor.picpaysimplificado.utils.http.RequestUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.io.IOException;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Log4j2
 public class TransactionServiceImpl implements TransactionService {
-    private TransactionRepository transactionRepository;
-    private UserService userService;
+    private final TransactionRepository transactionRepository;
+    private final UserService userService;
 
     @Override
-    public Transaction createTransaction(long payeeId, long payerId, BigDecimal amount) {
+    public Transaction createTransaction(CreateTransactionDTO transactionDTO) {
         log.info("Start to create transaction");
-        var transaction = TransactionMapper.toEntity(payeeId, payerId, amount);
+        var transaction = TransactionMapper.toEntity(transactionDTO);
         return transactionRepository.save(transaction);
     }
 
@@ -45,24 +50,35 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public void doTransfer(long payerId, long payeeId, BigDecimal amount) {
-        log.info("Start to transfer from {} to {} value {}", payerId, payeeId, amount);
-        var payer = userService.findUserById(payerId);
-        var payee = userService.findUserById(payeeId);
+    public Transaction doTransfer(CreateTransactionDTO transactionDTO) throws IOException {
+        log.info("METHOD:: Start to transfer from {} to {} value {}", transactionDTO.payerId(), transactionDTO.payeeId(), transactionDTO.amount());
+        var payer = userService.findUserById(transactionDTO.payerId());
+        var payee = userService.findUserById(transactionDTO.payeeId());
         var canDoTransaction = verifyIfPayerIsValid(payer);
-        if(!canDoTransaction) throw new InvalidPayerException(Constants.INVALID_PAYER_DETAIL, Constants.INVALID_PAYER_DETAIL);
-        if(payer.getBalance().compareTo(amount) < 0) throw new InsufficientBalance(Constants.INSUFFICIENT_BALANCE_DETAIL, Constants.INSUFFICIENT_BALANCE_TITLE);
-        payer.setBalance(payer.getBalance().subtract(amount));
-        payer.setBalance(payee.getBalance().add(amount));
-        var transaction = createTransaction(payeeId, payerId, amount);
-        List.of(payer, payee).forEach(user -> userService.saveUser(user));
-        confirmTransaction(transaction);
+        if (!canDoTransaction) {
+            log.error("METHOD:: Invalid payer {}", StringUtil.setMaskOnDocument(payer.getDocument()));
+            throw new InvalidPayerException(Constants.INVALID_PAYER_DETAIL, Constants.INVALID_PAYER_TITLE);
+        }
+        if (payer.getBalance().compareTo(transactionDTO.amount()) < 0) {
+            log.error("METHOD:: Insufficient balance {}", payer.getBalance());
+            throw new InsufficientBalance(Constants.INSUFFICIENT_BALANCE_DETAIL, Constants.INSUFFICIENT_BALANCE_TITLE);
+        }
+        payer.setBalance(payer.getBalance().subtract(transactionDTO.amount()));
+        payee.setBalance(payee.getBalance().add(transactionDTO.amount()));
+        var transaction = createTransaction(transactionDTO);
+        verifyIfTransferIsApproved();
+        List.of(payer, payee).forEach(userService::saveUser);
+        var updatedTransaction = confirmTransaction(transaction);
         sendTransactionNotification(payee.getEmail());
+        return updatedTransaction;
     }
 
     @Override
-    public boolean verifyIfTransferIsApproved() {
-        return true;
+    public boolean verifyIfTransferIsApproved() throws IOException {
+        String EXTERNAL_URL = "https://util.devi.tools/api/v2/authorize";
+        var response = RequestUtil.doRequest(EXTERNAL_URL, null, null, null, HttpMethod.GET, null);
+        var body = JsonUtil.fromJson(response.getBody(), ExternalStatusResponseDTO.class);
+        return body.getData().isAuthorization();
     }
 
     @Override
