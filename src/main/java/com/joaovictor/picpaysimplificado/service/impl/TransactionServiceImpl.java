@@ -2,7 +2,9 @@ package com.joaovictor.picpaysimplificado.service.impl;
 
 import com.joaovictor.picpaysimplificado.constants.api.transaction.TransactionStatusEnum;
 import com.joaovictor.picpaysimplificado.entity.Transaction;
+import com.joaovictor.picpaysimplificado.entity.User;
 import com.joaovictor.picpaysimplificado.exceptions.transaction.InsufficientBalance;
+import com.joaovictor.picpaysimplificado.exceptions.transaction.InvalidPayerException;
 import com.joaovictor.picpaysimplificado.mappers.TransactionMapper;
 import com.joaovictor.picpaysimplificado.repository.TransactionRepository;
 import com.joaovictor.picpaysimplificado.service.interfac.TransactionService;
@@ -41,6 +43,8 @@ public class TransactionServiceImpl implements TransactionService {
     public void doTransfer(long payerId, long payeeId, BigDecimal amount) {
         var payer = userService.findUserById(payerId);
         var payee = userService.findUserById(payeeId);
+        var canDoTransaction = verifyIfPayerIsValid(payer);
+        if(!canDoTransaction) throw new InvalidPayerException();
         if(payer.getBalance().compareTo(amount) == -1) throw new InsufficientBalance();
         payer.getBalance().subtract(amount);
         payee.getBalance().add(amount);
@@ -59,4 +63,9 @@ public class TransactionServiceImpl implements TransactionService {
     public void sendTransactionNotification(String email) {
         // Enviar para o listener
     }
+
+    public boolean verifyIfPayerIsValid(User payer) {
+        return payer.getDocument().length() != 14;
+    }
+
 }

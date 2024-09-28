@@ -6,5 +6,9 @@ public final class Constants {
     }
 
     public static final String INSUFFICIENT_BALANCE_TITLE = "Insufficient Balance!";
-    public static final String INSUFFICIENT_BALANCE_DETAIL = "The payer don't have sufficient balance for this operation";
+    public static final String INSUFFICIENT_BALANCE_DETAIL = "The payer don't have sufficient balance for this operation.";
+
+    public static final String INVALID_PAYER_TITLE = "Invalid Payer!";
+    public static final String INVALID_PAYER_DETAIL = "Traders can't do transaction.";
+
 }
