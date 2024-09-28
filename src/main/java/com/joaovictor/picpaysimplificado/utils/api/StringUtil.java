@@ -1,4 +1,4 @@
-package com.joaovictor.picpaysimplificado.utils;
+package com.joaovictor.picpaysimplificado.utils.api;
 
 public final class StringUtil {
     private StringUtil() {
