@@ -10,13 +10,14 @@ import com.joaovictor.picpaysimplificado.repository.TransactionRepository;
 import com.joaovictor.picpaysimplificado.service.interfac.TransactionService;
 import com.joaovictor.picpaysimplificado.service.interfac.UserService;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
     private UserService userService;
