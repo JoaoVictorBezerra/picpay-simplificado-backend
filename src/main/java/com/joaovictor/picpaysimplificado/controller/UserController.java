@@ -1,7 +1,7 @@
 package com.joaovictor.picpaysimplificado.controller;
 
-import com.joaovictor.picpaysimplificado.dto.RestResponseDTO;
 import com.joaovictor.picpaysimplificado.dto.user.CreateUserRequestDTO;
+import com.joaovictor.picpaysimplificado.dto.user.UserDTO;
 import com.joaovictor.picpaysimplificado.service.interfac.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,9 +18,8 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<RestResponseDTO> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
         var createdUser = userService.createUser(createUserRequestDTO);
-        var response = new RestResponseDTO(createdUser, null, null);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(createdUser, HttpStatus.OK);
     }
 }

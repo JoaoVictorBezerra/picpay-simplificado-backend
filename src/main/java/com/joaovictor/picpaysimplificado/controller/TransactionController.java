@@ -1,8 +1,8 @@
 package com.joaovictor.picpaysimplificado.controller;
 
 
-import com.joaovictor.picpaysimplificado.dto.RestResponseDTO;
 import com.joaovictor.picpaysimplificado.dto.transaction.CreateTransactionDTO;
+import com.joaovictor.picpaysimplificado.entity.Transaction;
 import com.joaovictor.picpaysimplificado.service.interfac.TransactionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,9 +21,8 @@ public class TransactionController {
     private final TransactionService transactionService;
 
     @PostMapping("/create")
-    public ResponseEntity<RestResponseDTO> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO) throws IOException {
+    public ResponseEntity<Transaction> createTransaction(@RequestBody CreateTransactionDTO createTransactionDTO) throws IOException {
         var transaction = transactionService.doTransfer(createTransactionDTO);
-        var response = new RestResponseDTO(transaction, null, null);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(transaction, HttpStatus.OK);
     }
 }
